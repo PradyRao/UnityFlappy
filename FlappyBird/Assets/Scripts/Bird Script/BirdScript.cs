@@ -13,6 +13,7 @@ namespace FlappyGame
         private float bounceSpeed = 4f;
         private bool didFlap;
         public bool isAlive;
+        public int score;
 
         private Button flapButton;
 
@@ -20,9 +21,14 @@ namespace FlappyGame
         private Rigidbody2D myRigidBody;
         [SerializeField]
         private Animator ani;
+        [SerializeField]
+        private AudioSource audioSource;
+        [SerializeField]
+        private AudioClip flapClip, pointClip, diedClip;
 
         private void Awake()
         {
+            score = 0;
             if(instance == null)
             {
                 instance = this;
@@ -55,6 +61,7 @@ namespace FlappyGame
                     didFlap = false;
                     myRigidBody.velocity = new Vector2(0, bounceSpeed);
                     ani.SetTrigger("Flap");
+                    audioSource.PlayOneShot(flapClip);
                 }
 
                 if(myRigidBody.velocity.y >= 0)
@@ -83,6 +90,30 @@ namespace FlappyGame
         public void flapBird()
         {
             didFlap = true;
+        }
+
+        void OnCollisionEnter2D(Collision2D target)
+        {
+            if (target.gameObject.tag == "Ground" || target.gameObject.tag == "Pipe")
+            {
+                if (isAlive)
+                {
+                    isAlive = false;
+                    ani.SetTrigger("Dead");
+                    audioSource.PlayOneShot(diedClip);
+                }
+            }
+                
+        }
+
+        void OnTriggerEnter2D(Collider2D target)
+        {
+            if(target.tag == "PipeHolder")
+            {
+                score++;
+                audioSource.PlayOneShot(pointClip);
+            }
+                
         }
     }
 }
